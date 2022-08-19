@@ -1,16 +1,31 @@
 #!/bin/sh
+set -e
 
 # Maintainer: Sibren Vasse <arch@sibrenvasse.nl>
 # Contributor: Ilya Gulya <ilyagulya@gmail.com>
 pkgname="deezer"
-pkgver=5.30.300
+pkgver=5.30.310
 srcdir="$PWD"
 
+help()
+{
+    echo "Usage: $0 [OPTIONS]
+
+Options:
+  --install-app,-i      Install Deezer desktop app
+  --uninstall-app,-u    Uninstall Deezer desktop app
+  --help,-h		Show this help message"
+    return $?
+}
+
 install_dependencies() {
-    # Manually install Node.js 12 since the version provided in some Ubuntu distros
-    # is older than 10.13.0 which prettier requires.
-    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-    sudo apt install -y p7zip-full imagemagick nodejs wget g++ make patch
+    if [ "`lsb_release -cs`" = "jammy" ]
+    then
+    	sudo apt install -y p7zip-full imagemagick nodejs wget g++ make patch npm
+    else
+        curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E $SHELL -
+    	sudo apt install -y p7zip-full imagemagick wget g++ make patch npm
+    fi
     sudo npm install -g electron@^13 --unsafe-perm=true
     sudo npm install -g --engine-strict asar
     sudo npm install -g prettier
@@ -34,7 +49,7 @@ prepare() {
     mkdir -p app/resources/linux/
 
     # Remove NodeRT from package (-205.72 MiB)
-    rm -r app/node_modules/@nodert
+    [ -d "app/node_modules/@nodert" ] && rm -r app/node_modules/@nodert
 
     # Install extra node modules for mpris-service
     mkdir "$srcdir/npm_temp"; cd "$srcdir/npm_temp"
@@ -84,5 +99,45 @@ package() {
     sudo update-desktop-database --quiet
 }
 
-install_dependencies && prepare && package
-echo "Successfully installed Deezer Desktop!"
+install_app()
+{
+    install_dependencies && prepare && package; [ $? = "0" ] && echo "Successfully installed Deezer Desktop!" || echo "An error occurred"
+    return $1
+}
+
+uninstall_app()
+{
+    printf "\nUninstalling Deezer... "
+    [ -f "/usr/share/deezer" ] && sudo rm -rfv /usr/share/deezer || true
+    [ -f "//usr/share/applications/" ] && sudo rm -v /usr/share/applications/deezer.desktop || true
+    [ -f "/usr/bin/" ] && sudo rm -v /usr/bin/deezer || true
+
+    for size in 16 32 48 64 128 256; do
+        if [ -f "/usr/share/icons/hicolor/${size}x${size}/apps/deezer.png" ]
+        then
+            sudo rm -v /usr/share/icons/hicolor/${size}x${size}/apps/deezer.png
+        fi
+    done
+
+    sudo update-desktop-database --quiet
+
+    sudo apt purge --autoremove \*p7zip\* \*imagemagick\* \*nodejs\* \*g++\* \*make\* \*npm\*
+
+    [ $? = "0" ] && printf "OK.\nDeezer has been uninstalled.\n\n" || echo "An error occurred"
+
+    return $1
+}
+
+[ $# -eq 0 ] && help && exit 0
+
+while [ $# -eq 1 ]
+do
+    case "$1" in
+    	--install-app|-i) install_app; exit $?;;
+    	--uninstall-app|-u) uninstall_app; exit $?;;
+    	--help|-h) help; exit $?;;
+    	*) help; exit $?;;
+    esac
+    shift
+done
+
