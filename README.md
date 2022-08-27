@@ -2,7 +2,7 @@
 
 ![Screenshot of Deezer Desktop running on Kubuntu with the media player integration visible](screenshot.png)
 
-Unofficial script to install Deezer desktop on Ubuntu. Based on [the AUR Script by SibrenVasse](https://aur.archlinux.org/packages/deezer/).
+An unofficial Deezer client port for Debian-based distributions
 
 For Windows, Deezer distributes a version of the Electron run time (Windows binary) and the source code of their application itself. The build process of this package extracts the application source from the Windows installer.
 
@@ -25,21 +25,21 @@ deezer --start-in-tray
 To install on Ubuntu:
 
 ```bash
-git clone https://github.com/siphomateke/deezer
+git clone https://github.com/mrkenhoo/deezer.git
 cd deezer
-chmod +x ./install.sh
-./install.sh
+chmod +x ./deezer.sh
+./deezer.sh -b && ./deezer.sh -i
 ```
 
 The Deezer Windows installer will then be downloaded, extracted and patched to work for Linux. When prompted for your sudo password, please enter it.
 
 ## Uninstalling
 
-You can uninstall Deezer by running `uninstall.sh`:
+You can uninstall Deezer by running `deezer.sh -u`:
 
 ```bash
-chmod +x ./uninstall.sh
-./uninstall.sh
+chmod +x ./deezer.sh
+./deezer.sh -u
 ```
 
 ## Updating
