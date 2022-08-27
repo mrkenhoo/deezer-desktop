@@ -13,7 +13,7 @@ pkgrel=1
 _pkgname=$pkgname-$pkgver-$pkgrel
 srcdir="`pwd`/src/tmp"
 _srcdir="`pwd`/src"
-pkgdir="`pwd`/src/$pkgname-$pkgver-$pkgrel"
+pkgdir="$_srcdir/$pkgname-$pkgver-$pkgrel"
 
 help()
 {
@@ -89,11 +89,8 @@ build()
 
     cd .. && asar pack "app" "app.asar"
 
-    return $?
-
-    cd "$srcdir"
     [ ! -d "$pkgdir" ] && mkdir -p "$pkgdir"
-    sudo mkdir -p "$pkgdir/DEBIAN/"
+    [ ! -d "$pkgdir/DEBIAN/" ] && sudo mkdir -p "$pkgdir/DEBIAN/"
 
     if [ ! -f "$pkgdir/DEBIAN/control" ]
     then
@@ -118,13 +115,13 @@ Description: Deezer audio streaming service" | sudo tee "$pkgdir/DEBIAN/control"
         sudo mkdir -p "$pkgdir/usr/share/icons/hicolor/${size}x${size}/apps/"
     done
 
-    sudo install -Dm644 "deezer/resources/app.asar" "$pkgdir/usr/share/deezer/"
-    sudo install -Dm644 "deezer/resources/win/deezer-0.png" "$pkgdir/usr/share/icons/hicolor/16x16/apps/deezer.png"
-    sudo install -Dm644 "deezer/resources/win/deezer-1.png" "$pkgdir/usr/share/icons/hicolor/32x32/apps/deezer.png"
-    sudo install -Dm644 "deezer/resources/win/deezer-2.png" "$pkgdir/usr/share/icons/hicolor/48x48/apps/deezer.png"
-    sudo install -Dm644 "deezer/resources/win/deezer-3.png" "$pkgdir/usr/share/icons/hicolor/64x64/apps/deezer.png"
-    sudo install -Dm644 "deezer/resources/win/deezer-4.png" "$pkgdir/usr/share/icons/hicolor/128x128/apps/deezer.png"
-    sudo install -Dm644 "deezer/resources/win/deezer-5.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/deezer.png"
+    sudo install -Dm644 "$srcdir/deezer/resources/app.asar" "$pkgdir/usr/share/deezer/"
+    sudo install -Dm644 "$srcdir/deezer/resources/win/deezer-0.png" "$pkgdir/usr/share/icons/hicolor/16x16/apps/deezer.png"
+    sudo install -Dm644 "$srcdir/deezer/resources/win/deezer-1.png" "$pkgdir/usr/share/icons/hicolor/32x32/apps/deezer.png"
+    sudo install -Dm644 "$srcdir/deezer/resources/win/deezer-2.png" "$pkgdir/usr/share/icons/hicolor/48x48/apps/deezer.png"
+    sudo install -Dm644 "$srcdir/deezer/resources/win/deezer-3.png" "$pkgdir/usr/share/icons/hicolor/64x64/apps/deezer.png"
+    sudo install -Dm644 "$srcdir/deezer/resources/win/deezer-4.png" "$pkgdir/usr/share/icons/hicolor/128x128/apps/deezer.png"
+    sudo install -Dm644 "$srcdir/deezer/resources/win/deezer-5.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/deezer.png"
     sudo install -Dm644 "$_srcdir/$pkgname.desktop" "$pkgdir/usr/share/applications/"
     sudo install -Dm755 "$_srcdir/deezer" "$pkgdir/usr/bin/"
 
