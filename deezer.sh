@@ -8,7 +8,7 @@ set -e
 #   - Ilya Gulya <ilyagulya@gmail.com>
 #
 pkgname=deezer
-pkgver=5.30.310
+pkgver=5.30.320
 pkgrel=1
 _pkgname=$pkgname-$pkgver-$pkgrel
 srcdir="`pwd`/src/tmp"
