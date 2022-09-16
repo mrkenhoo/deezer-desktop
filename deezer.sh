@@ -31,7 +31,14 @@ Options:
 
 build()
 {
-    if [ "`lsb_release -cs`" = "jammy" ]
+    for p in lsb_release curl
+    do
+        [ ! -x "`command -v ${p}`" ] && sudo apt install -y "${p}"
+    done
+
+    exit
+
+    if [ "`lsb_release -cs`" = "jammy" ] || [ "`lsb_release -cs`" = "bullseye" ]
     then
     	sudo apt install -y p7zip-full imagemagick nodejs wget g++ make patch npm
     else
