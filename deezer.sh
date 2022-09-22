@@ -167,7 +167,7 @@ uninstall_deezer()
 
 cleanup()
 {
-    sudo apt purge --autoremove -y \*p7zip\* \*imagemagick\* \*g++\* \*make\* \*npm\*
+    sudo apt purge --autoremove -y \*p7zip\* \*imagemagick\* \*g++\* \*make\*
     rm -rf "$_srcdir/tmp" "$_srcdir/$pkgdir"
 }
 
