@@ -8,7 +8,7 @@ set -e
 #   - Ilya Gulya <ilyagulya@gmail.com>
 #
 pkgname=deezer
-pkgver=5.30.330
+pkgver=5.30.340
 pkgrel=1
 _pkgname=$pkgname-$pkgver-$pkgrel
 srcdir="`pwd`/src/tmp"
@@ -31,12 +31,10 @@ Options:
 
 build()
 {
-    for p in lsb_release curl
+    for p in lsb-release curl
     do
         [ ! -x "`command -v ${p}`" ] && sudo apt install -y "${p}"
     done
-
-    exit
 
     if [ "`lsb_release -cs`" = "jammy" ] || [ "`lsb_release -cs`" = "bullseye" ]
     then
