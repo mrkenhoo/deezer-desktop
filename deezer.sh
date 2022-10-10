@@ -92,7 +92,9 @@ build()
     # Add start in tray cli option (https://github.com/SibrenVasse/deezer/pull/12)
     patch --forward --strip=1 --input="../../../../start-hidden-on-tray.patch"
 
-    cd .. && asar pack "app" "app.asar"
+    cd .. && \
+    rm app/node_modules/abstract-socket/build/node_gyp_bins/python3 || true && \
+    asar pack "app" "app.asar"
 
     [ ! -d "$pkgdir" ] && mkdir -p "$pkgdir"
     [ ! -d "$pkgdir/DEBIAN/" ] && sudo mkdir -p "$pkgdir/DEBIAN/"
