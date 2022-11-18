@@ -5,8 +5,10 @@
 #   - Sibren Vasse <arch@sibrenvasse.nl>
 #   - Ilya Gulya <ilyagulya@gmail.com>
 #
+set -e
+
 pkgname=deezer
-pkgver=5.30.370
+pkgver=5.30.380
 pkgrel=2
 _pkgname=$pkgname-$pkgver-$pkgrel
 arch=amd64
@@ -19,8 +21,8 @@ help()
     echo "Usage: ${0} [OPTIONS]
 
 Options:
-  --build-package,-b    Build a package for $pkgname
-  --install,-i          Install the $pkgname deb package
+  --build-package,-b    Build package for $pkgname
+  --install-package,-i  Install the $pkgname package
   --uninstall,-u        Uninstall $pkgname
   --cleanup,-c          Uninstall build dependencies and remove source files
   --help,-h             Show this help message"
@@ -48,37 +50,37 @@ main()
 
 prepare()
 {
-    if [ $LINUX_DISTRIBUTION = "opensuse" ]
+    if [ ! -z $LINUX_DISTRIBUTION ]
     then
-        for p in lsb-release ImageMagick curl nodejs npm
-        do
-            sudo zypper install -y $p || return 1
-        done
-    elif [ $LINUX_DISTRIBUTION = "redhat" ]
-    then
-        for p in lsb-release ImageMagick curl nodejs npm
-        do
-            sudo dnf install -y $p || return 1
-        done
-    elif [ $LINUX_DISTRIBUTION = "debian" ]
-    then
-        for p in lsb-release imagemagick curl nodejs npm
-        do
-            sudo apt install -y $p || return 1
-        done
+        if [ $LINUX_DISTRIBUTION = "opensuse" ]
+        then
+            sudo zypper install -y ImageMagick curl nodejs npm p7zip-full || return 1
+        elif [ $LINUX_DISTRIBUTION = "rhel" ]
+        then
+            sudo dnf install -y ImageMagick curl nodejs npm p7zip-full || return 1
+        elif [ $LINUX_DISTRIBUTION = "debian" ]
+        then
+            sudo apt install -y imagemagick curl nodejs npm p7zip-full || return 1
+         else
+             echo "Unknown distribution: $LINUX_DISTRIBUTION" && exit 1
+         fi
+    else
+        echo "No distribution chosen, exiting..." && exit 1
     fi
 
-    [ ! -d "$srcdir" ] && mkdir -p "$srcdir"
-    [ ! -d "$tmpdir" ] && mkdir -p "$tmpdir"
-    [ ! -d "$pkgdir" ] && mkdir -p "$pkgdir"
+    [ ! -d "$srcdir" ] && mkdir -pv "$srcdir"
+    [ ! -d "$tmpdir" ] && mkdir -pv "$tmpdir"
+    [ ! -d "$pkgdir" ] && mkdir -pv "$pkgdir"
+    [ ! -d "$pkgdir/$_pkgname" ] && mkdir -pv "$pkgdir/$_pkgname"
 
-    npm install electron@^13 --unsafe-perm=true
-    npm install --engine-strict asar
-    npm install prettier
+    cd "$srcdir" || return 1
+    sudo npm install -g electron@^13 --unsafe-perm=true
+    sudo npm install -g --engine-strict @electron/asar
+    sudo npm install -g prettier
 
     if [ "$PACKAGE_TYPE" = "deb" ]
     then
-        [ ! -d "$pkgdir/DEBIAN/" ] && mkdir -p "$pkgdir/DEBIAN/"
+        [ ! -d "$pkgdir/DEBIAN/" ] && mkdir -p "$pkgdir/$_pkgname/DEBIAN/"
         [ ! -f "$pkgdir/DEBIAN/control" ] && echo "Source: $_pkgname
 Package: $pkgname
 Version: $pkgver-$pkgrel
@@ -89,16 +91,16 @@ Architecture: $arch
 Essential: no
 Maintainer: Ken Hoo <60463234+mrkenhoo@users.noreply.github.com>
 Copyright: Copyright (c) 2006-2022 Deezer S.A.
-Description: Deezer audio streaming service" | tee "$pkgdir/DEBIAN/control" > /dev/null
+Description: Deezer audio streaming service" | tee "$pkgdir/$_pkgname/DEBIAN/control" > /dev/null
 
-        mkdir -p "$pkgdir/usr/share/deezer"
-        mkdir -p "$pkgdir/usr/share/applications"
-        mkdir -p "$pkgdir/usr/bin/"
+        mkdir -p "$pkgdir/$_pkgname/usr/share/deezer"
+        mkdir -p "$pkgdir/$_pkgname/usr/share/applications"
+        mkdir -p "$pkgdir/$_pkgname/usr/bin/"
 
-        [ ! -f "$pkgdir/usr/bin/" ] && echo 'exec electron /usr/share/deezer/app.asar "$@"' | tee "$pkgdir/usr/bin/deezer" > /dev/null
+        [ ! -f "$pkgdir/$_pkgname/usr/bin/" ] && echo 'exec electron /usr/share/deezer/app.asar "$@"' | tee "$pkgdir/$_pkgname/usr/bin/deezer" > /dev/null
 
         for size in 16 32 48 64 128 256; do
-            [ ! -d "$size" ] && mkdir -p "$pkgdir/usr/share/icons/hicolor/${size}x${size}/apps/"
+            [ ! -d "$size" ] && mkdir -p "$pkgdir/$_pkgname/usr/share/icons/hicolor/${size}x${size}/apps/"
         done
     elif [ "$PACKAGE_TYPE" = "rpm" ]
     then
@@ -159,21 +161,21 @@ build()
         [ -f "app/node_modules/abstract-socket/build/node_gyp_bins/python3" ] && \
             rm "app/node_modules/abstract-socket/build/node_gyp_bins/python3" || \
                 asar pack "app" "app.asar"
-    
+
     if [ $PACKAGE_TYPE = "deb" ]
     then
-        install -Dm644 "$tmpdir/deezer/resources/app.asar" "$pkgdir/usr/share/deezer/"
-        install -Dm644 "$tmpdir/deezer/resources/win/deezer-0.png" "$pkgdir/usr/share/icons/hicolor/16x16/apps/deezer.png"
-        install -Dm644 "$tmpdir/deezer/resources/win/deezer-1.png" "$pkgdir/usr/share/icons/hicolor/32x32/apps/deezer.png"
-        install -Dm644 "$tmpdir/deezer/resources/win/deezer-2.png" "$pkgdir/usr/share/icons/hicolor/48x48/apps/deezer.png"
-        install -Dm644 "$tmpdir/deezer/resources/win/deezer-3.png" "$pkgdir/usr/share/icons/hicolor/64x64/apps/deezer.png"
-        install -Dm644 "$tmpdir/deezer/resources/win/deezer-4.png" "$pkgdir/usr/share/icons/hicolor/128x128/apps/deezer.png"
-        install -Dm644 "$tmpdir/deezer/resources/win/deezer-5.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/deezer.png"
-        install -Dm644 "$srcdir/$pkgname.desktop" "$pkgdir/usr/share/applications/"
-        install -Dm755 "$srcdir/deezer" "$pkgdir/usr/bin/"
+        install -Dm644 "$tmpdir/deezer/resources/app.asar" "$pkgdir/$_pkgname/usr/share/deezer/"
+        install -Dm644 "$tmpdir/deezer/resources/win/deezer-0.png" "$pkgdir/$_pkgname/usr/share/icons/hicolor/16x16/apps/deezer.png"
+        install -Dm644 "$tmpdir/deezer/resources/win/deezer-1.png" "$pkgdir/$_pkgname/usr/share/icons/hicolor/32x32/apps/deezer.png"
+        install -Dm644 "$tmpdir/deezer/resources/win/deezer-2.png" "$pkgdir/$_pkgname/usr/share/icons/hicolor/48x48/apps/deezer.png"
+        install -Dm644 "$tmpdir/deezer/resources/win/deezer-3.png" "$pkgdir/$_pkgname/usr/share/icons/hicolor/64x64/apps/deezer.png"
+        install -Dm644 "$tmpdir/deezer/resources/win/deezer-4.png" "$pkgdir/$_pkgname/usr/share/icons/hicolor/128x128/apps/deezer.png"
+        install -Dm644 "$tmpdir/deezer/resources/win/deezer-5.png" "$pkgdir/$_pkgname/usr/share/icons/hicolor/256x256/apps/deezer.png"
+        install -Dm644 "$srcdir/$pkgname.desktop" "$pkgdir/$_pkgname/usr/share/applications/"
+        install -Dm755 "$srcdir/deezer" "$pkgdir/$_pkgname/usr/bin/"
 
-        cd "$pkgdir" && \
-            dpkg-deb -v --build `pwd`/$pkgname-$pkgver-$pkgrel && \
+        cd "$pkgdir/$_pkgname" && \
+            dpkg-deb -v --build "`pwd`" && \
                 [ -x "`command -v update-desktop-database`" ] && \
                     update-desktop-database --quiet || \
                         echo "Build the cache database of MIME types yourself to handle the '$pkgname://' protocol"
@@ -184,10 +186,10 @@ build()
             --dest $srcdir \
             --arch $arch \
             --options.productName $pkgname \
-            --options.icon $pkgdir/usr/share/icons/hicolor/apps/deezer.png \
+            --options.icon $pkgdir/$_pkgname/usr/share/icons/hicolor/apps/deezer.png \
             --options.desktopTemplate src/deezer.desktop.ejs
     fi
-    
+
     return $?
 }
 
@@ -199,16 +201,17 @@ install_deezer()
         then
             if [ -f "$pkgdir/$_pkgname.deb" ]
             then
-                if `dpkg -s deezer | grep Version | cut -d " " -f 2` -less "$_pkgname"
+                if [ ! -x "`command -v deezer`" ]
                 then
-                    printf "Package found: $pkgdir/$_pkgname.deb\nversion: $pkgver\nRelease version: $pkgrel\n"
+                    printf "Package found: $pkgdir/$_pkgname.deb\nVersion: $pkgver\nRelease version: $pkgrel\n"
                     read -p "Do you want to install it now? [Y/N] " installPackage
                     case "$installPackage" in
                         Y|y|Yes|yes|YES)
                         sudo dpkg -i "$pkgdir/$_pkgname.deb"
                     ;;
                     esac
-                else
+                elif [ "`dpkg -s deezer | grep Version | cut -d " " -f 2`" = "$pkgver-$pkgrel" ]
+                then
                     echo "You are already using the latest version of $pkgname ($pkgver-$pkgrel)."
                 fi
             fi
@@ -229,16 +232,17 @@ uninstall_deezer()
         then
             if [ -f "$pkgdir/$_pkgname.deb" ]
             then
-                if ! -z `dpkg -s deezer | grep Package | cut -d " " -f 2`
+                if [ -x "`command -v deezer`" ]
                 then
-                    printf "Package found: $pkgdir/$_pkgname.deb\nversion: $pkgver\nRelease version: $pkgrel\n"
-                    read -p "Do you want to install it now? [Y/N] " installPackage
+                    printf "Package found: $pkgdir/$_pkgname.deb\nVersion: $pkgver\nRelease version: $pkgrel\n"
+                    read -p "Do you want to uninstall it now? [Y/N] " installPackage
                     case "$installPackage" in
                         Y|y|Yes|yes|YES)
-                        sudo dpkg -i "$pkgdir/$_pkgname.deb"
+                        sudo apt purge --autoremove $pkgname
                     ;;
                     esac
-                else
+                elif [ "`dpkg -s deezer | grep Version | cut -d " " -f 2`" = "$pkgver-$pkgrel" ]
+                then
                     echo "You are already using the latest version of $pkgname ($pkgver-$pkgrel)."
                 fi
             fi
@@ -266,7 +270,7 @@ do
         --uninstall|-u) main && uninstall_deezer; exit $?;;
         --cleanup|-c) cleanup; exit $?;;
     	--help|-h) help; exit $?;;
-    	*) help; exit $?;;
+    	*) [ ! -z $1 ] && printf "ERROR: Unknown parameter: $1\n\n" && help || help; exit $?;;
     esac
     shift
 done
