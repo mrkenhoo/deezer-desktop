@@ -34,18 +34,31 @@ main()
 {
     tmpfile=$(mktemp)
 
-    zenity --list \
-           --title="Choose your distribution" \
-           --column=ID --column=Distribution \
-           opensuse "openSUSE" \
-           debian "Debian GNU/Linux" \
-           rhel "Red Hat Enterprise Linux" > $tmpfile
+    if test $DISPLAY
+    then
+        zenity --list \
+               --title="Choose your distribution" \
+               --column=ID --column=Distribution \
+               opensuse "openSUSE" \
+               debian "Debian GNU/Linux" \
+               rhel "Red Hat Enterprise Linux" > $tmpfile
+        case "`cat $tmpfile`" in
+            opensuse) export PACKAGE_TYPE="rpm" LINUX_DISTRIBUTION="opensuse";;
+            rhel) export PACKAGE_TYPE="rpm" LINUX_DISTRIBUTION="rhel";;
+            debian) export PACKAGE_TYPE="deb" LINUX_DISTRIBUTION="debian";;
+        esac
+    else
+        dialog --menu "Choose your distribution" 10 35 1 \
+            1 openSUSE \
+            2 RHEL \
+            3 Debian 2> $tmpfile
 
-    case "`cat $tmpfile`" in
-        opensuse) export PACKAGE_TYPE="rpm" LINUX_DISTRIBUTION="opensuse";;
-        rhel) export PACKAGE_TYPE="rpm" LINUX_DISTRIBUTION="rhel";;
-        debian) export PACKAGE_TYPE="deb" LINUX_DISTRIBUTION="debian";;
-    esac
+        case "`cat $tmpfile`" in
+            1) export PACKAGE_TYPE="rpm" LINUX_DISTRIBUTION="opensuse";;
+            2) export PACKAGE_TYPE="rpm" LINUX_DISTRIBUTION="rhel";;
+            3) export PACKAGE_TYPE="deb" LINUX_DISTRIBUTION="debian";;
+        esac
+    fi
 
     return $?
 }
@@ -70,10 +83,10 @@ prepare()
         echo "No distribution chosen, exiting..." && exit 1
     fi
 
-    test test ! -d "$srcdir" && mkdir -pv "$srcdir"
-    test test ! -d "$tmpdir" && mkdir -pv "$tmpdir"
-    test test ! -d "$pkgdir" && mkdir -pv "$pkgdir"
-    test test ! -d "$pkgdir/$_pkgname" && mkdir -pv "$pkgdir/$_pkgname"
+    test ! -d "$srcdir" && mkdir -pv "$srcdir"
+    test ! -d "$tmpdir" && mkdir -pv "$tmpdir"
+    test ! -d "$pkgdir" && mkdir -pv "$pkgdir"
+    test ! -d "$pkgdir/$_pkgname" && mkdir -pv "$pkgdir/$_pkgname"
 
     cd "$srcdir" || return 1
     sudo npm install -g electron@^13 --unsafe-perm=true
@@ -110,7 +123,7 @@ Description: Deezer audio streaming service" | \
         fi
 
         for size in 16 32 48 64 128 256; do
-            if test test ! -d  "$size"
+            if test ! -d  "$size"
             then
                 mkdir -p "$pkgdir/$_pkgname/usr/share/icons/hicolor/${size}x${size}/apps/"
             fi
@@ -135,7 +148,7 @@ build()
         curl -fSL "https://www.deezer.com/desktop/download/artifact/win32/x86/$pkgver" \
             -o "$tmpdir/$pkgname-$pkgver-setup.exe"
 
-     ! -f "$tmpdir/app-32.7z" && \
+     test ! -f "$tmpdir/app-32.7z" && \
         7z x -so "$tmpdir/$pkgname-$pkgver-setup.exe" "\$PLUGINSDIR/app-32.7z" > "$tmpdir/app-32.7z"
 
      test ! -d  "$tmpdir/deezer" && \
@@ -150,19 +163,19 @@ build()
         test -d "npm_temp" && rm -rf "npm_temp"
 
     asar extract "app.asar" "app" && \
-         test ! -d  "app/resources/linux" && \
+        test ! -d  "app/resources/linux" && \
             mkdir -p "app/resources/linux/"
 
     test -d "app/node_modules/@nodert" && \
         rm -r "app/node_modules/@nodert"
 
-     test ! -d  "npm_temp" && mkdir "npm_temp" && \
+    test ! -d  "npm_temp" && mkdir "npm_temp" && \
         npm install --prefix npm_temp mpris-service
 
     for d in npm_temp/node_modules/*
     do
-         test ! -d  "app/node_modules/`basename $d`" && \
-            mv "$d" "app/node_modules/"
+        test ! -d  "app/node_modules/`basename $d`" && \
+           mv "$d" "app/node_modules/"
     done
 
     test -d "app/resources/linux" && \
