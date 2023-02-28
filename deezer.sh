@@ -8,8 +8,8 @@
 set -e
 
 pkgname=deezer
-pkgver=5.30.400
-pkgrel=2
+pkgver=5.30.520
+pkgrel=1
 _pkgname=$pkgname-$pkgver-$pkgrel
 arch=amd64
 srcdir="`pwd`/src"
