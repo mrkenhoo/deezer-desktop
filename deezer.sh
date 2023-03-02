@@ -8,7 +8,7 @@
 set -e
 
 pkgname=deezer
-pkgver=5.30.520
+pkgver=5.30.530
 pkgrel=1
 _pkgname=$pkgname-$pkgver-$pkgrel
 arch=amd64
