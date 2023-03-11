@@ -1,0 +1,57 @@
+,"scripts": {
+    "copy-resources": "mkdir -p resources/linux && cp ../src/extras/linux/* ",
+    "start": "yarn run copy-resources && electron .",
+    "build": "electron-builder --x64 --linux deb rpm tar.gz",
+    "build-deb": "electron-builder --x64 --linux deb",
+    "build-rpm": "electron-builder --x64 --linux rpm",
+    "build-appimage": "electron-builder --x64 --linux AppImage",
+    "build-tar-gz": "electron-builder --x64 --linux tar.gz",
+
+    "build-arm": "electron-builder --arm64 --linux deb rpm tar.gz",
+    "build-deb-arm": "electron-builder --arm64 --linux deb",
+    "build-rpm-arm": "electron-builder --arm64 --linux rpm",
+    "build-appimage-arm": "electron-builder --arm64 --linux AppImage",
+    "build-tar-gz-arm": "electron-builder --arm64 --linux tar.gz"
+    },
+    "devDependencies": {
+        "electron": "^13.6.9",
+        "electron-builder": "^23.0.3"
+    },
+    "build": {
+        "files": [
+            "**"
+        ],
+        "directories": {
+            "buildResources": "build",
+	    "output": "../artifacts/${arch}"
+        },
+        "extraResources": [
+            {
+                "from": "../src/extra/*",
+                "to": ".",
+                "filter": ["**"]
+            }
+        ],
+        "linux": {
+            "maintainer": "Ken Hoo",
+            "icon": "../src/icons/*.png",
+            "category": "Utility;AudioVideo;Audio;Player;Music",
+            "desktop": {
+                "Name": "Deezer",
+                "Type": "Application",
+                "GenericName": "Deezer",
+                "Comment": "Listen and download all your favorite music",
+                "MimeType": "x-scheme-handler/deezer;",
+                "Keywords": "Music;Player;Streaming;Online",
+                "StartupWMClass": "Deezer"
+            },
+            "artifactName": "${productName}-${version}-${arch}.${ext}"
+        },
+        "deb": {
+            "artifactName": "${productName}-${version}-${arch}.${ext}"
+        },
+        "rpm": {
+            "artifactName": "${productName}-${version}-${arch}.${ext}"
+        }
+    }
+}
