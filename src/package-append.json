@@ -1,5 +1,5 @@
 ,"scripts": {
-    "copy-resources": "mkdir -p resources/linux && cp ../src/extras/linux/* ",
+    "copy-resources": "mkdir -p resources/linux && cp ../src/extras/linux/*.png resources/linux",
     "start": "yarn run copy-resources && electron .",
     "build": "electron-builder --x64 --linux deb rpm tar.gz",
     "build-deb": "electron-builder --x64 --linux deb",
@@ -27,14 +27,14 @@
         },
         "extraResources": [
             {
-                "from": "../src/extra/*",
+                "from": "../../src/extras*",
                 "to": ".",
                 "filter": ["**"]
             }
         ],
         "linux": {
             "maintainer": "Ken Hoo",
-            "icon": "../src/icons/*.png",
+            "icon": "../../src/icons",
             "category": "Utility;AudioVideo;Audio;Player;Music",
             "desktop": {
                 "Name": "Deezer",
