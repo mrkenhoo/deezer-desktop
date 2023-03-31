@@ -1,4 +1,4 @@
-# deezer
+# deezer-desktop
 
 ![Screenshot of Deezer Desktop running on Kubuntu with the media player integration visible](screenshot.png)
 
@@ -17,7 +17,7 @@ This package applies several patches for:
 You can start Deezer minimized on the tray using the `--start-in-tray` flag;
 
 ```bash
-deezer --start-in-tray
+deezer-desktop --start-in-tray
 ```
 
 ## Building
@@ -25,21 +25,20 @@ deezer --start-in-tray
 To install on Ubuntu:
 
 ```bash
-git clone https://github.com/mrkenhoo/deezer.git
-cd deezer
-chmod +x ./deezer.sh
-./deezer.sh -b && ./deezer.sh -i
+git clone https://github.com/mrkenhoo/deezer-desktop.git
+cd deezer-desktop
+make build_deb
+sudo dpkg -i build/artifacts/x64/deezer-desktop-[VERSION].deb
 ```
 
 The Deezer Windows installer will then be downloaded, extracted and patched to work for Linux. When prompted for your sudo password, please enter it.
 
 ## Uninstalling
 
-You can uninstall Deezer by running `deezer.sh -u`:
+You can uninstall Deezer by running:
 
 ```bash
-chmod +x ./deezer.sh
-./deezer.sh -u
+sudo apt remove deezer-desktop
 ```
 
 ## Updating
@@ -49,8 +48,7 @@ chmod +x ./deezer.sh
 cd deezer
 # Pull the latest version
 git pull
-chmod +x ./install.sh
-./install.sh
+make build_deb
 ```
 
 ## Debugging
@@ -58,7 +56,7 @@ chmod +x ./install.sh
 Running the application from the command line will show verbose logging.
 
 ```bash
-deezer
+deezer-desktop
 ```
 
 To run the application with devtools by running
