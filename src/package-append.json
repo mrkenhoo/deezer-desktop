@@ -27,7 +27,7 @@
         },
         "extraResources": [
             {
-                "from": "../../src/extras*",
+                "from": "../../src/extras",
                 "to": ".",
                 "filter": ["**"]
             }
