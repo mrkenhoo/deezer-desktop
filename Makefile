@@ -44,7 +44,7 @@ prepare: clean install_build_dependencies
 		@cd build && node_modules/.bin/prettier --write "app/build/*.js"
 
 		@echo "Applying patches..."
-		@$(foreach p, $(wildcard .src/patches/*.patch), patch --verbose -p1 -d build/app -i ../../$(p))
+		@$(foreach p, $(wildcard ./src/patches/*.patch), patch -p 1 -d build/app -i ../../$(p);)
 		@cat src/package-append.json >> build/app/package.json
 
 		@echo "Fixing syntax of the file build/app/package.json..."
