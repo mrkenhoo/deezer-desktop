@@ -14,7 +14,7 @@ clean:
 install_build_dependencies:
 		@test ! -d build && mkdir -v build || continue
 
-		@test ! -x `command -v npm` && echo "Please install npm" && exit 1 || continue
+		@test ! $$(command -v npm) && echo "Please install npm" && exit 1 || continue
 
 		@echo "[NPM] Installing package electron/asar..."
 		@cd build && npm install --engine-strict electron/asar
