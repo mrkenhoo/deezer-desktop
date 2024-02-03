@@ -1,7 +1,7 @@
 # Maintainer: Ken Hoo <60463234+mrkenhoo@users.noreply.github.com>
 
 APPNAME = org.mrkenhoo.deezer
-PKGVER = 5.30.660
+PKGVER = 6.0.60
 BASE_URL = https://www.deezer.com/desktop/download/artifact/win32/x86/$(PKGVER)
 VERSION_REGEX = ^v$(PKGVER)-[0-9]{1,}$$
 
