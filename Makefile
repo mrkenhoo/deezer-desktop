@@ -5,7 +5,7 @@ PKGVER = 6.0.60
 BASE_URL = https://www.deezer.com/desktop/download/artifact/win32/x86/$(PKGVER)
 VERSION_REGEX = ^v$(PKGVER)-[0-9]{1,}$$
 
-all: clean install_dependencies
+all: install_dependencies
 
 clean:
 		@echo "Cleaning build directory..."
