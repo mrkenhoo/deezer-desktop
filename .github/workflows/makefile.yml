@@ -1,0 +1,25 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Prepare build
+      run: make prepare
+
+    - name: Build DEB package
+      run: make build_deb
+
+    - name: Build RPM package
+      run: make build_rpm
+
+    - name: Build TAR file
+      run: make build_tar
